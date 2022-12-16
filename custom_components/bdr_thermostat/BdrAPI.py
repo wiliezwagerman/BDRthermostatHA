@@ -12,7 +12,7 @@ class BdrAPI:
     BASE_HEADER = {
         "Accept": "application/json, text/plain, */*",
         "Connection": "keep-alive",
-        "X-Requested-With": "com.bdrthermea.roomunitapplication.baxi",
+        "X-Requested-With": "com.bdrthermea.roomunitapplication.",
         "Content-Type": "application/json;charset=UTF-8",
         "Sec-Fetch-Site": "cross-site",
         "Sec-Fetch-Mode": "cors",
@@ -37,6 +37,7 @@ class BdrAPI:
         self._user = user
         self._password = password
         self._pairing_code = pairing_code
+        self.BASE_HEADER.update({"X-Requested-With": self.BASE_HEADER["X-Requested-With"] + self._brand.lower()})
 
     async def bootstrap(self):
         if self._bootstraped:
