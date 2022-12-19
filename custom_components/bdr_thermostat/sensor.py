@@ -61,7 +61,9 @@ async def async_setup_entry(hass, config_entry, async_add_devices):
 			OutsideTemperatureSensor(hass, config_entry.data),
 			HeatingSensor(hass, config_entry.data),
 			EnergyConsumptionSensor(hass, config_entry.data),
-			BurningHoursSensor(hass, config_entry.data)
+			BurningHoursSensor(hass, config_entry.data),
+            NextChangeTemperatureSensor(hass, config_entry.data),
+            NextChangeTimeSensor(hass, config_entry.data)
         ],
         update_before_add=True,
     )     
@@ -143,6 +145,87 @@ class ErrorSensor(SensorEntity):
             #self._attr_native_unit_of_measurement = ""
             self._attr_native_value = "N/A"    
 
+class NextChangeTemperatureSensor(SensorEntity):
+
+    def __init__(self, hass, config):
+        """Initialize the sensor"""
+        super().__init__()
+        self.hass = hass
+        self._bdr_api = hass.data[PLATFORM].get(DATA_KEY_API)
+        self._attr_device_class = SensorDeviceClass.TEMPERATURE
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_should_poll = True
+        self._attr_device_info = {
+            "identifiers": {
+                (
+                    SERIAL_KEY,
+                    self._bdr_api.get_device_information().get("serial", "1234"),
+                )
+            }
+		}
+        self._attr_name = config.get(CONF_NAME) + " Next change temperature"
+        self._attr_unique_id = self._attr_name
+
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        return self._bdr_api.is_bootstraped()
+
+    async def async_update(self):
+    
+        status = await self._bdr_api.get_status()
+
+        if status:
+            next_switch = status.get("nextSwitch", None)
+            if next_switch:
+                self._attr_native_value["next_temp"] = next_switch[
+                    "roomTemperatureSetpoint"
+                ]["value"]   
+            else:
+                self._attr_native_value = "N/A"      
+     
+        else:
+            self._attr_native_value = "N/A"   
+
+class NextChangeTimeSensor(SensorEntity):
+
+    def __init__(self, hass, config):
+        """Initialize the sensor"""
+        super().__init__()
+        self.hass = hass
+        self._bdr_api = hass.data[PLATFORM].get(DATA_KEY_API)
+        self._attr_device_class = SensorDeviceClass.TIME
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_should_poll = True
+        self._attr_device_info = {
+            "identifiers": {
+                (
+                    SERIAL_KEY,
+                    self._bdr_api.get_device_information().get("serial", "1234"),
+                )
+            }
+		}
+        self._attr_name = config.get(CONF_NAME) + " Next change temperature"
+        self._attr_unique_id = self._attr_name
+
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        return self._bdr_api.is_bootstraped()
+
+    async def async_update(self):
+    
+        status = await self._bdr_api.get_status()
+
+        if status:
+            next_switch = status.get("nextSwitch", None)
+            if next_switch:
+                self._attr_native_value["next_temp"] = next_switch["time"]
+            else:
+                self._attr_native_value = "N/A"      
+     
+        else:
+            self._attr_native_value = "N/A"   
 
 class EnergyConsumptionSensor(SensorEntity):
     

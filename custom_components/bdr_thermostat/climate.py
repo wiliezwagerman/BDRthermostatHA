@@ -127,6 +127,7 @@ class BdrThermostat(ClimateEntity, RestoreEntity):
         if temperature is None:
             return
 
+        await self.async_update()
         next_change = self._attr_extra_state_attributes.get("next_change", None)
 
         if next_change:
