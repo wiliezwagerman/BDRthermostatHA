@@ -14,8 +14,7 @@ from .const import (
     BDR_PRESET_MODE,
 )
 from homeassistant.components.climate.const import (
-    HVAC_MODE_OFF,
-    HVAC_MODE_AUTO,
+    HVACMode, HVACAction 
 )
 import datetime
 from datetime import timedelta
@@ -61,16 +60,24 @@ def preset_mode_ha_to_bdr(ha_mode):
 
 def hvac_mode_bdr_to_ha(raw_mode):
     if raw_mode == "off":
-        return HVAC_MODE_OFF
+        return HVACMode.OFF
     elif raw_mode == "heating-auto":
-        return HVAC_MODE_AUTO
+        return HVACMode.AUTO
 
 
 def hvac_mode_ha_to_bdr(ha_mode):
-    if ha_mode == HVAC_MODE_AUTO:
+    if ha_mode == HVACMode.AUTO:
         return "heating-auto"
-    elif ha_mode == HVAC_MODE_OFF:
+    elif ha_mode == HVACMode.OFF:
         return "off"
+
+def hvac_action_bdr_to_ha(raw_mode):
+    if raw_mode == "heating":
+        return HVACAction.HEATING
+    elif raw_mode == "standby":
+        return HVACAction.IDLE
+    else: return None
+    
 
 
 def create_override_date(target_time, days_offset):

@@ -1,5 +1,5 @@
 """BDR thermostat's constant """
-from homeassistant.components.climate.const import HVAC_MODE_AUTO, HVAC_MODE_OFF
+from homeassistant.components.climate.const import HVACMode, HVACAction
 
 # Generic
 
@@ -48,4 +48,4 @@ PRESET_MODES = [
     PRESET_MODE_HOLIDAY,
 ]
 
-HVAC_MODES = [HVAC_MODE_OFF, HVAC_MODE_AUTO]
+HVAC_MODES = [HVACMode.OFF, HVACMode.AUTO]

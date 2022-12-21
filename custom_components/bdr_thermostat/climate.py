@@ -73,9 +73,10 @@ class BdrThermostat(ClimateEntity, RestoreEntity):
         self._attr_hvac_modes = (
             HVAC_MODES
             if self._bdr_api.is_feature_enabled(FEATURE_OPERATING_MODE)
-            else [HVAC_MODE_AUTO]
+            else [HVACMode.AUTO]
         )
-        self._attr_hvac_mode = HVAC_MODE_AUTO
+        self._attr_hvac_mode = HVACMode.AUTO
+        self._attr_hvac_action = None
         self._attr_extra_state_attributes = {}
         self._attr_should_poll = True
         self._attr_device_info = {
@@ -93,7 +94,12 @@ class BdrThermostat(ClimateEntity, RestoreEntity):
         return self._bdr_api.is_bootstraped()
 
     async def async_update(self):
-        status = await self._bdr_api.get_status()
+
+        try:
+            status = await self._bdr_api.get_status()
+        except Exception as e:
+            _LOGGER.info("Could not connect to API.")
+            return
 
         if status:
             self._attr_current_temperature = status["roomTemperature"]["value"]
@@ -102,6 +108,7 @@ class BdrThermostat(ClimateEntity, RestoreEntity):
             self._attr_preset_mode = preset_mode_bdr_to_ha(
                 status["mode"], status["timeProgram"]
             )
+            self._attr_hvac_action = hvac_action_bdr_to_ha(status["zoneActivity"])
             next_switch = status.get("nextSwitch", None)
             if next_switch:
                 self._attr_extra_state_attributes["next_change"] = next_switch["time"]
@@ -128,6 +135,7 @@ class BdrThermostat(ClimateEntity, RestoreEntity):
             return
 
         await self.async_update()
+
         next_change = self._attr_extra_state_attributes.get("next_change", None)
 
         if next_change:
