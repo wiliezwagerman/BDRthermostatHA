@@ -1,27 +1,20 @@
 import logging
-from homeassistant.components.climate.const import (
-    HVAC_MODE_OFF,
-)
-from homeassistant.helpers.reload import async_setup_reload_service
+
+import async_timeout
 from homeassistant.components.climate import PLATFORM_SCHEMA, ClimateEntity
+from homeassistant.components.climate.const import HVACMode
+from homeassistant.const import (ATTR_TEMPERATURE, CONF_NAME, PRECISION_HALVES,
+                                 UnitOfTemperature)
+from homeassistant.helpers.device_registry import DeviceEntryType
+from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.reload import async_setup_reload_service
 from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.helpers.typing import (
-    ConfigType,
-    DiscoveryInfoType,
-    HomeAssistantType,
-)
-from datetime import timedelta
-from typing import Any, Callable, Dict, Optional
+from homeassistant.helpers.typing import (ConfigType, DiscoveryInfoType,
+                                          HomeAssistantType)
+
+from .config_schema import CLIMATE_SCHEMA, SUPPORT_FLAGS
 from .const import *
 from .helper import *
-from homeassistant.const import (
-    CONF_NAME,
-    ATTR_TEMPERATURE,
-)
-
-from .config_schema import SUPPORT_FLAGS, CLIMATE_SCHEMA
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.device_registry import DeviceEntryType
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=30)
@@ -93,23 +86,17 @@ class BdrThermostat(ClimateEntity, RestoreEntity):
         """Return True if entity is available."""
         return self._bdr_api.is_bootstraped()
 
-    async def async_update(self):
+    async def async_update(self) -> None:
 
         try:
-            status = await self._bdr_api.get_status()
+            async with async_timeout.timeout(5):
+                self.status = await self._bdr_api.get_status()
         except Exception as e:
             _LOGGER.info("Could not connect to API.")
             return
 
-        if status:
-            self._attr_current_temperature = status["roomTemperature"]["value"]
-            self._attr_temperature_unit = status["roomTemperature"]["unit"]
-            self._attr_target_temperature = status["roomTemperatureSetpoint"]["value"]
-            self._attr_preset_mode = preset_mode_bdr_to_ha(
-                status["mode"], status["timeProgram"]
-            )
-            self._attr_hvac_action = hvac_action_bdr_to_ha(status["zoneActivity"])
-            next_switch = status.get("nextSwitch", None)
+        if self.status:
+            next_switch = self.status.get("nextSwitch", None)
             if next_switch:
                 self._attr_extra_state_attributes["next_change"] = next_switch["time"]
                 self._attr_extra_state_attributes["next_temp"] = next_switch[
@@ -158,15 +145,45 @@ class BdrThermostat(ClimateEntity, RestoreEntity):
             preset_mode
         )
 
-        self._attr_preset_mode = preset_mode
+        self.preset_mode = preset_mode
 
         # Set a schedule
         if bdr_preset_mode == BDR_PRESET_SCHEDULE:
             await self._bdr_api.set_schedule(program)
         # Set a manual temperature
         elif bdr_preset_mode == BDR_PRESET_MANUAL:
-            await self._bdr_api.set_target_temperature(self._attr_target_temperature)
+            await self._bdr_api.set_target_temperature(self.target_temperature)
         elif bdr_preset_mode == BDR_PRESET_MODE:
             await self._bdr_api.set_operating_mode(mode=program)
 
         await self.async_update_ha_state()
+
+        @property
+        def current_temperature(self) -> float:
+            """Return current temperature."""
+            return self.status["roomTemperature"]["value"]
+
+        @property
+        def temperature_unit(self):
+            """Return temperature unit."""
+            return hvac_unit_bdr_to_ha(self.status["roomTemperature"]["unit"])
+            
+        @property
+        def target_temperature(self) -> float|None:
+            """Return current target temperature."""
+            return self.status["roomTemperatureSetpoint"]["value"]
+
+        @property
+        def preset_mode(self):
+            """Return current preset mode."""
+            return preset_mode_bdr_to_ha(self.status["mode"], self.status["timeProgram"])
+
+        @property
+        def hvac_action(self):
+            """Return current action status."""
+            return hvac_action_bdr_to_ha(self.status["zoneActivity"])
+
+        @property
+        def target_temperature_step(self) -> float:
+            """Set target temperature step to halves."""
+            return PRECISION_HALVES

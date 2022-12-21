@@ -14,7 +14,7 @@ from .const import (
     BDR_PRESET_MODE,
 )
 from homeassistant.components.climate.const import (
-    HVACMode, HVACAction 
+    HVACMode, HVACAction, UnitOfTemperature
 )
 import datetime
 from datetime import timedelta
@@ -78,6 +78,12 @@ def hvac_action_bdr_to_ha(raw_mode):
         return HVACAction.IDLE
     else: return None
     
+def hvac_unit_bdr_to_ha(raw_mode):
+    if raw_mode == "°C":
+        return UnitOfTemperature.CELCIUS
+    elif raw_mode == "°F":
+        return UnitOfTemperature.FAHRENHEIT
+    else: return UnitOfTemperature.CELCIUS
 
 
 def create_override_date(target_time, days_offset):
