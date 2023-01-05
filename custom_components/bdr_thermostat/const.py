@@ -49,3 +49,11 @@ PRESET_MODES = [
 ]
 
 HVAC_MODES = [HVACMode.OFF, HVACMode.AUTO]
+
+HEATER_STATUS = [
+    'heating', 
+    'idle', 
+    'off', 
+    'cooling',
+    'unknown'
+]
