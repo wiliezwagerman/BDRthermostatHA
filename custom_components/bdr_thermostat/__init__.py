@@ -11,6 +11,7 @@ from homeassistant.helpers import device_registry as dr
 PLATFORMS = [
     Platform.CLIMATE,
     Platform.SENSOR,
+    Platform.BINARY_SENSOR
 ]
 
 

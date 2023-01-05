@@ -103,4 +103,6 @@ def create_override_date(target_time, days_offset):
 
 def bdr_error_to_ha_binary(error_status):
     if error_status != "no-error":
-        return 
+        return True
+    else:
+        return False
