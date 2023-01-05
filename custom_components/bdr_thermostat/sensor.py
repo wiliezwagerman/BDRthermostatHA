@@ -8,6 +8,7 @@ from homeassistant.helpers.typing import (
 from datetime import timedelta
 from typing import Callable, Optional
 from .const import *
+from .helper import *
 from homeassistant.const import (
     CONF_NAME,
 )
@@ -45,7 +46,9 @@ async def async_setup_platform(
 			OutsideTemperatureSensor(hass, config),
 			HeatingSensor(hass, config),
 			EnergyConsumptionSensor(hass, config),
-			BurningHoursSensor(hass, config)
+			BurningHoursSensor(hass, config),
+            NextChangeTemperatureSensor(hass, config),
+            NextChangeTimeSensor(hass, config)
         ],
         update_before_add=True,
     )
@@ -115,6 +118,7 @@ class ErrorSensor(SensorEntity):
         super().__init__()
         self.hass = hass
         self._bdr_api = hass.data[PLATFORM].get(DATA_KEY_API)
+        self._attr_device_class = SensorDeviceClass.ENUM
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_should_poll = True
         self._attr_device_info = {
@@ -139,10 +143,8 @@ class ErrorSensor(SensorEntity):
 
         if error:
             self._attr_native_value = error["status"]                 
-            #self._attr_native_unit_of_measurement = outside_temperature["waterPressure"]["unit"]
      
         else:
-            #self._attr_native_unit_of_measurement = ""
             self._attr_native_value = "N/A"    
 
 class NextChangeTemperatureSensor(SensorEntity):
@@ -178,14 +180,19 @@ class NextChangeTemperatureSensor(SensorEntity):
         if status:
             next_switch = status.get("nextSwitch", None)
             if next_switch:
-                self._attr_native_value["next_temp"] = next_switch[
+                self._attr_native_value = next_switch[
                     "roomTemperatureSetpoint"
                 ]["value"]   
+                self._attr_native_unit_of_measurement = next_switch[
+                    "roomTemperatureSetpoint"
+                ]["unit"]   
             else:
                 self._attr_native_value = "N/A"      
+                self._attr_native_unit_of_measurement = ""
      
         else:
             self._attr_native_value = "N/A"   
+            self._attr_native_unit_of_measurement = ""
 
 class NextChangeTimeSensor(SensorEntity):
 
@@ -194,7 +201,7 @@ class NextChangeTimeSensor(SensorEntity):
         super().__init__()
         self.hass = hass
         self._bdr_api = hass.data[PLATFORM].get(DATA_KEY_API)
-        self._attr_device_class = SensorDeviceClass.TIME
+        self._attr_device_class = SensorDeviceClass.TIMESTAMP
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_should_poll = True
         self._attr_device_info = {
@@ -205,7 +212,7 @@ class NextChangeTimeSensor(SensorEntity):
                 )
             }
 		}
-        self._attr_name = config.get(CONF_NAME) + " Next change temperature"
+        self._attr_name = config.get(CONF_NAME) + " Next change time"
         self._attr_unique_id = self._attr_name
 
     @property
@@ -220,7 +227,8 @@ class NextChangeTimeSensor(SensorEntity):
         if status:
             next_switch = status.get("nextSwitch", None)
             if next_switch:
-                self._attr_native_value["next_temp"] = next_switch["time"]
+                self._attr_native_value = create_override_date(next_switch["time"], next_switch["dayOffset"])
+                
             else:
                 self._attr_native_value = "N/A"      
      

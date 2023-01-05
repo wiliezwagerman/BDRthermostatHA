@@ -14,7 +14,12 @@ from .const import (
     BDR_PRESET_MODE,
 )
 from homeassistant.components.climate.const import (
-    HVACMode, HVACAction, UnitOfTemperature
+    HVACMode, HVACAction
+)
+
+
+from homeassistant.const import (
+    UnitOfTemperature
 )
 import datetime
 from datetime import timedelta
@@ -95,3 +100,7 @@ def create_override_date(target_time, days_offset):
         hour=target_hour, minute=target_minutes, second=0, microsecond=0
     )
     return override_date.isoformat("T", "minutes")
+
+def bdr_error_to_ha_binary(error_status):
+    if error_status != "no-error":
+        return 
