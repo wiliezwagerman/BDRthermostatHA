@@ -1,21 +1,11 @@
 from homeassistant.config_entries import ConfigEntry
 
-from .const import (
-    PLATFORM,
-    PRESET_MODE_HOLIDAY,
-    PRESET_MODE_MANUAL,
-    PRESET_MODE_SCHEDULE_1,
-    PRESET_MODE_SCHEDULE_2,
-    PRESET_MODE_SCHEDULE_3,
-    PRESET_MODE_TEMP_OVERRIDE,
-    PRESET_MODE_ANTIFROST,
-    BDR_PRESET_MANUAL,
-    BDR_PRESET_SCHEDULE,
-    BDR_PRESET_MODE,
-)
+from .const import *
 from homeassistant.components.climate.const import (
-    HVACMode, HVACAction,
+    HVACMode, HVACAction
 )
+
+
 from homeassistant.const import (
     UnitOfTemperature
 )
@@ -98,3 +88,16 @@ def create_override_date(target_time, days_offset):
         hour=target_hour, minute=target_minutes, second=0, microsecond=0
     )
     return override_date.isoformat("T", "minutes")
+
+def bdr_error_to_ha_binary(error_status):
+    if error_status != "no-error":
+        return True
+    else:
+        return False
+
+def bdr_status_enum_check(heater_status):
+    if heater_status in HEATER_STATUS:
+        return heater_status
+    else:
+        _LOGGER.warning("Status ENUM does not contain %s, therefor status is unkown", heater_status)
+        return 'unknown'
