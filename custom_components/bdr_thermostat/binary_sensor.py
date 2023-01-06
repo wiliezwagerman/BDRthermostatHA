@@ -16,6 +16,7 @@ from homeassistant.const import (
 
 from .const import *
 from .helper import *
+from typing import Callable, Optional
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(minutes=10)

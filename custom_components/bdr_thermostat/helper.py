@@ -7,7 +7,9 @@ from homeassistant.components.climate.const import (
 
 
 from homeassistant.const import (
-    UnitOfTemperature
+    ATTR_TEMPERATURE,
+    UnitOfTemperature,
+    CONF_TIME_ZONE
 )
 import datetime
 from datetime import timedelta
@@ -71,15 +73,15 @@ def hvac_action_bdr_to_ha(raw_mode):
         return HVACAction.IDLE
     else: return None
     
-def hvac_unit_bdr_to_ha(raw_mode):
+def hvac_unit_bdr_to_ha(raw_mode) -> UnitOfTemperature:
     if raw_mode == "°C":
-        return UnitOfTemperature.CELCIUS
+        return UnitOfTemperature.CELSIUS
     elif raw_mode == "°F":
         return UnitOfTemperature.FAHRENHEIT
-    else: return UnitOfTemperature.CELCIUS
+    else: return UnitOfTemperature.CELSIUS
 
 
-def create_override_date(target_time, days_offset):
+def create_override_date(target_time, days_offset, create_string = False):
     now = datetime.datetime.now()
     override_date = now + timedelta(days=days_offset)
     target_hour = int(target_time.split(":")[0])
@@ -87,7 +89,11 @@ def create_override_date(target_time, days_offset):
     override_date = override_date.replace(
         hour=target_hour, minute=target_minutes, second=0, microsecond=0
     )
-    return override_date.isoformat("T", "minutes")
+    override_date = override_date.astimezone()
+    if create_string:
+        return override_date.isoformat("T", "minutes")
+    else:
+        return override_date
 
 def bdr_error_to_ha_binary(error_status):
     if error_status != "no-error":

@@ -2,17 +2,28 @@ import logging
 
 import async_timeout
 from homeassistant.components.climate import PLATFORM_SCHEMA, ClimateEntity
-from homeassistant.components.climate.const import HVACMode
-from homeassistant.const import (ATTR_TEMPERATURE, CONF_NAME, PRECISION_HALVES,
-                                 UnitOfTemperature)
+from homeassistant.components.climate.const import (
+    HVACMode
+)
+from homeassistant.const import (
+    ATTR_TEMPERATURE, 
+    CONF_NAME, 
+    PRECISION_HALVES,
+    UnitOfTemperature
+)
 from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.reload import async_setup_reload_service
 from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.helpers.typing import (ConfigType, DiscoveryInfoType,
-                                          HomeAssistantType)
+from homeassistant.helpers.typing import (
+    ConfigType, 
+    DiscoveryInfoType,
+    HomeAssistantType
+)
 
 from .config_schema import CLIMATE_SCHEMA, SUPPORT_FLAGS
+from datetime import timedelta
+from typing import Any, Callable, Dict, Optional
 from .const import *
 from .helper import *
 
@@ -127,7 +138,7 @@ class BdrThermostat(ClimateEntity, RestoreEntity):
 
         if next_change:
             # We are in scheduled mode, need to create a temporary override
-            override_date = create_override_date(next_change, self.next_switch_days)
+            override_date = create_override_date(next_change, self.next_switch_days, True)
             await self._bdr_api.set_override_temperature(temperature, override_date)
         else:
             # Manual mode, it is fine to modify the temp
@@ -158,32 +169,32 @@ class BdrThermostat(ClimateEntity, RestoreEntity):
 
         await self.async_update_ha_state()
 
-        @property
-        def current_temperature(self) -> float:
-            """Return current temperature."""
-            return self.status["roomTemperature"]["value"]
-
-        @property
-        def temperature_unit(self):
-            """Return temperature unit."""
-            return hvac_unit_bdr_to_ha(self.status["roomTemperature"]["unit"])
+    @property
+    def current_temperature(self) -> float:
+        """Return current temperature."""
+        return self.status["roomTemperature"]["value"]
             
-        @property
-        def target_temperature(self) -> float|None:
-            """Return current target temperature."""
-            return self.status["roomTemperatureSetpoint"]["value"]
+    @property
+    def target_temperature(self) -> float|None:
+        """Return current target temperature."""
+        return self.status["roomTemperatureSetpoint"]["value"]
 
-        @property
-        def preset_mode(self):
-            """Return current preset mode."""
-            return preset_mode_bdr_to_ha(self.status["mode"], self.status["timeProgram"])
+    @property
+    def hvac_action(self):
+        """Return current action status."""
+        return hvac_action_bdr_to_ha(self.status["zoneActivity"])
 
-        @property
-        def hvac_action(self):
-            """Return current action status."""
-            return hvac_action_bdr_to_ha(self.status["zoneActivity"])
+    @property
+    def target_temperature_step(self) -> float:
+        """Set target temperature step to halves."""
+        return PRECISION_HALVES
 
-        @property
-        def target_temperature_step(self) -> float:
-            """Set target temperature step to halves."""
-            return PRECISION_HALVES
+    @property
+    def temperature_unit(self):
+        """return temperature units"""
+        return hvac_unit_bdr_to_ha(self.status["roomTemperature"]["unit"])
+
+    @property
+    def preset_mode(self):
+        """return current preset mode"""
+        return preset_mode_bdr_to_ha(self.status["mode"], self.status["timeProgram"])

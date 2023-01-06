@@ -118,7 +118,7 @@ class ErrorSensor(SensorEntity):
         super().__init__()
         self.hass = hass
         self._bdr_api = hass.data[PLATFORM].get(DATA_KEY_API)
-        self._attr_device_class = SensorDeviceClass.ENUM
+        # self._attr_device_class = SensorDeviceClass.ENUM
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_should_poll = True
         self._attr_device_info = {
@@ -183,9 +183,9 @@ class NextChangeTemperatureSensor(SensorEntity):
                 self._attr_native_value = next_switch[
                     "roomTemperatureSetpoint"
                 ]["value"]   
-                self._attr_native_unit_of_measurement = next_switch[
+                self._attr_native_unit_of_measurement = hvac_unit_bdr_to_ha(next_switch[
                     "roomTemperatureSetpoint"
-                ]["unit"]   
+                ]["unit"])   
             else:
                 self._attr_native_value = "N/A"      
                 self._attr_native_unit_of_measurement = ""
@@ -345,7 +345,7 @@ class FlowTemperatureSensor(SensorEntity):
 
         if water_temperature:
             self._attr_native_value = water_temperature["systemFlowTemperature"]             
-            self._attr_native_unit_of_measurement = water_temperature["unit"]
+            self._attr_native_unit_of_measurement = hvac_unit_bdr_to_ha(water_temperature["unit"])
      
         else:
             self._attr_native_unit_of_measurement = ""
@@ -383,7 +383,7 @@ class OutsideTemperatureSensor(SensorEntity):
 
         if status and status.get("outsideTemperature"):
             self._attr_native_value = status["outsideTemperature"]["value"]          
-            self._attr_native_unit_of_measurement = status["outsideTemperature"]["unit"]
+            self._attr_native_unit_of_measurement = hvac_unit_bdr_to_ha(status["outsideTemperature"]["unit"])
      
         else:
             self._attr_native_unit_of_measurement = ""
@@ -396,8 +396,8 @@ class HeatingSensor(SensorEntity):
         super().__init__()
         self.hass = hass
         self._bdr_api = hass.data[PLATFORM].get(DATA_KEY_API)
-        self._attr_device_class = SensorDeviceClass.ENUM
         self._attr_options = HEATER_STATUS
+        #self._attr_device_class = SensorDeviceClass.ENUM
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_should_poll = True
         self._attr_device_info = {
