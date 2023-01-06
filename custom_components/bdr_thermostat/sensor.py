@@ -45,7 +45,9 @@ async def async_setup_platform(
 			OutsideTemperatureSensor(hass, config),
 			HeatingSensor(hass, config),
 			EnergyConsumptionSensor(hass, config),
-			BurningHoursSensor(hass, config)
+			BurningHoursSensor(hass, config),
+            NextChangeTemperatureSensor(hass, config),
+            NextChangeTimeSensor(hass, config)
         ],
         update_before_add=True,
     )
