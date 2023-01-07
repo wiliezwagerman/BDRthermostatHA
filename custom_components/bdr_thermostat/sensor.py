@@ -397,8 +397,8 @@ class HeatingSensor(SensorEntity):
         self.hass = hass
         self._bdr_api = hass.data[PLATFORM].get(DATA_KEY_API)
         self._attr_options = HEATER_STATUS
-        #self._attr_device_class = SensorDeviceClass.ENUM
-        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_device_class = SensorDeviceClass.ENUM
+        #self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_should_poll = True
         self._attr_device_info = {
             "identifiers": {
@@ -424,4 +424,4 @@ class HeatingSensor(SensorEntity):
             self._attr_native_value = bdr_status_enum_check(status["zoneActivity"])        
      
         else:
-            self._attr_native_value = "unknown"   
+            self._attr_native_value = HEATER_STATUS[-1]
