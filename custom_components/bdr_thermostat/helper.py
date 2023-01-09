@@ -89,10 +89,10 @@ def create_override_date(target_time, days_offset, create_string = False):
     override_date = override_date.replace(
         hour=target_hour, minute=target_minutes, second=0, microsecond=0
     )
-    override_date = override_date.astimezone()
     if create_string:
         return override_date.isoformat("T", "minutes")
     else:
+        override_date = override_date.astimezone()
         return override_date
 
 def bdr_error_to_ha_binary(error_status):

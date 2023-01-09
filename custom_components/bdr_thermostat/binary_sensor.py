@@ -39,7 +39,6 @@ async def async_setup_platform(
     async_add_entities(
         [
             ErrorBinarySensor(hass, config), 
-            OperatingOptionsSensor(hass, config), 
         ],
         update_before_add=True,
     )
@@ -49,7 +48,6 @@ async def async_setup_entry(hass, config_entry, async_add_devices):
     async_add_devices(
         [
             ErrorBinarySensor(hass, config_entry.data),
-            OperatingOptionsSensor(hass, config_entry.data),
         ],
         update_before_add=True,
     )     
@@ -84,38 +82,5 @@ class ErrorBinarySensor(BinarySensorEntity):
 
         if error:
             self._attr_is_on = bdr_error_to_ha_binary(error)
-
-        else: self._attr_is_on = True
-
-class OperatingOptionsSensor(BinarySensorEntity):
-
-    def __init__(self, hass, config) -> None:
-        """Initialize the sensor."""
-        super().__init__()
-        self.hass = hass
-        self._bdr_api = hass.data[PLATFORM].get(DATA_KEY_API)
-        self._attr_device_class = BinarySensorDeviceClass.POWER
-        self._attr_should_poll = True
-        self._attr_device_info = {
-            "identifiers": {
-                (
-                    SERIAL_KEY,
-                    self._bdr_api.get_device_information().get("serial", "1234"),
-                )
-            }
-		}
-        self._attr_name = config.get(CONF_NAME) + " Operating testsensor"
-        self._attr_unique_id = self._attr_name
-
-    @property
-    def available(self) -> bool:
-        """Return True if entity is available."""
-        return self._bdr_api.is_bootstraped()
-
-    async def async_update(self):
-        status = await self._bdr_api.get_operating_mode()
-
-        if status:
-            self._attr_is_on = bdr_error_to_ha_binary(status["options"][0])
 
         else: self._attr_is_on = True
