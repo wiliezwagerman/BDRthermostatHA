@@ -101,6 +101,12 @@ def bdr_error_to_ha_binary(error_status):
     else:
         return False
 
+def bdr_power_to_ha_binary(On_OffStatus):
+    if On_OffStatus != "off":
+        return False
+    else:
+        return True
+
 def bdr_status_enum_check(heater_status):
     if heater_status in HEATER_STATUS:
         return heater_status
