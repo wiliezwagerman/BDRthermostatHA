@@ -91,10 +91,10 @@ def create_override_date(target_time, days_offset, create_string = False):
     override_date = override_date.replace(
         hour=target_hour, minute=target_minutes, second=0, microsecond=0
     )
-    override_date = override_date.astimezone()
     if create_string:
         return override_date.isoformat("T", "minutes")
     else:
+        override_date = override_date.astimezone()
         return override_date
 
 def bdr_error_to_ha_binary(error_status) -> bool:
@@ -103,12 +103,9 @@ def bdr_error_to_ha_binary(error_status) -> bool:
     else:
         return False
 
-# def bdr_status_enum_check(heater_status):
-#     i = 0
-#     while i < HEATER_STATUS.count():
-#         if heater_status == HEATER_STATUS[i]:
-#             return HEATER_STATUS[i]
-#             break
-#         i = i+1
-#     _LOGGER.warning("Status ENUM does not contain %s, therefor status is unkown", heater_status)
-#     return HEATER_STATUS[-1]
+def bdr_status_enum_check(heater_status):
+    if heater_status in HEATER_STATUS:
+        return heater_status
+    else:
+        _LOGGER.warning("Status ENUM does not contain %s, therefor status is unkown", heater_status)
+        return 'unknown'
