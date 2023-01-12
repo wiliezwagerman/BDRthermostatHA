@@ -156,7 +156,7 @@ class BdrThermostat(ClimateEntity, RestoreEntity):
             preset_mode
         )
 
-        self.preset_mode = preset_mode
+        #self.preset_mode(preset_mode)
 
         # Set a schedule
         if bdr_preset_mode == BDR_PRESET_SCHEDULE:

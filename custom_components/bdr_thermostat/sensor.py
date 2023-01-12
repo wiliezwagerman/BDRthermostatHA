@@ -421,7 +421,7 @@ class HeatingSensor(SensorEntity):
         status = await self._bdr_api.get_status()
 
         if status:
-            self._attr_native_value = bdr_status_enum_check(status["zoneActivity"])        
+            self._attr_native_value = status["zoneActivity"]     
      
         else:
-            self._attr_native_value = "unknown"   
+            self._attr_native_value = HEATER_STATUS[-1]   

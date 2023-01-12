@@ -53,24 +53,26 @@ def preset_mode_ha_to_bdr(ha_mode):
 
     return BDR_PRESET_MANUAL, "manual"
 
-def hvac_mode_bdr_to_ha(raw_mode):
+def hvac_mode_bdr_to_ha(raw_mode) -> HVACMode:
     if raw_mode == "off":
         return HVACMode.OFF
     elif raw_mode == "heating-auto":
         return HVACMode.AUTO
 
 
-def hvac_mode_ha_to_bdr(ha_mode):
+def hvac_mode_ha_to_bdr(ha_mode) -> str:
     if ha_mode == HVACMode.AUTO:
         return "heating-auto"
     elif ha_mode == HVACMode.OFF:
         return "off"
 
-def hvac_action_bdr_to_ha(raw_mode):
+def hvac_action_bdr_to_ha(raw_mode) -> HVACAction:
     if raw_mode == "heating":
         return HVACAction.HEATING
     elif raw_mode == "standby":
         return HVACAction.IDLE
+    elif raw_mode == "cooling":
+        return HVACAction.COOLING
     else: return None
     
 def hvac_unit_bdr_to_ha(raw_mode) -> UnitOfTemperature:
@@ -95,15 +97,18 @@ def create_override_date(target_time, days_offset, create_string = False):
     else:
         return override_date
 
-def bdr_error_to_ha_binary(error_status):
+def bdr_error_to_ha_binary(error_status) -> bool:
     if error_status != "no-error":
         return True
     else:
         return False
 
-def bdr_status_enum_check(heater_status):
-    if heater_status in HEATER_STATUS:
-        return heater_status
-    else:
-        _LOGGER.warning("Status ENUM does not contain %s, therefor status is unkown", heater_status)
-        return 'unknown'
+# def bdr_status_enum_check(heater_status):
+#     i = 0
+#     while i < HEATER_STATUS.count():
+#         if heater_status == HEATER_STATUS[i]:
+#             return HEATER_STATUS[i]
+#             break
+#         i = i+1
+#     _LOGGER.warning("Status ENUM does not contain %s, therefor status is unkown", heater_status)
+#     return HEATER_STATUS[-1]

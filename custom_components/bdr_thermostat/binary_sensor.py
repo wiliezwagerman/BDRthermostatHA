@@ -81,6 +81,6 @@ class ErrorBinarySensor(BinarySensorEntity):
         error = await self._bdr_api.get_errors()
 
         if error:
-            self._attr_is_on = bdr_error_to_ha_binary(error)
+            self._attr_is_on = bdr_error_to_ha_binary(error["status"])
 
         else: self._attr_is_on = True
