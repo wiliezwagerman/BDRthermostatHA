@@ -396,9 +396,6 @@ class HeatingSensor(SensorEntity):
         super().__init__()
         self.hass = hass
         self._bdr_api = hass.data[PLATFORM].get(DATA_KEY_API)
-        self._attr_options = HEATER_STATUS
-        self._attr_device_class = SensorDeviceClass.ENUM
-        #self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_should_poll = True
         self._attr_device_info = {
             "identifiers": {
@@ -416,12 +413,17 @@ class HeatingSensor(SensorEntity):
         """Return True if entity is available."""
         return self._bdr_api.is_bootstraped()
 
+    @property
+    def options(self):
+        """Return list with ENUM options"""
+        return HEATER_STATUS
+
     async def async_update(self):
     
         status = await self._bdr_api.get_status()
 
         if status:
-            self._attr_native_value = status["zoneActivity"]     
+            self._attr_native_value = bdr_status_enum_check(status["zoneActivity"])   
      
         else:
             self._attr_native_value = HEATER_STATUS[-1]
