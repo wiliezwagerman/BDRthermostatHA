@@ -107,5 +107,5 @@ def bdr_status_enum_check(heater_status):
     if heater_status in HEATER_STATUS:
         return heater_status
     else:
-        _LOGGER.warning("Status ENUM does not contain %s, therefor status is unkown", heater_status)
-        return 'unknown'
+        _LOGGER.warning("Status ENUM does not contain %s, therefor status is unknown", heater_status)
+        return HEATER_STATUS[-2]

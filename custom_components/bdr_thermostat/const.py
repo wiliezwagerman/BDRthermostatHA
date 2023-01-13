@@ -55,5 +55,6 @@ HEATER_STATUS = [
     'idle', 
     'off', 
     'cooling',
-    'unknown'
+    'unknown',
+    'N/A'
 ]
